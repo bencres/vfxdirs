@@ -69,11 +69,28 @@ class VFXDirs:
         key = app_id.strip().lower()
         try:
             provider = self._registry[key]
-        except KeyError as exc:
+        except KeyError as err:
             available = ", ".join(self.registered_apps()) or "<none>"
             raise KeyError(
-                f"Unknown app_id {app_id!r}. Registered apps: {available}") from exc
+                f"Unknown app_id {app_id!r}. Registered apps: {available}") from err
         return AppDirs(provider=provider, ctx=self._ctx, version=version)
 
     def path(self, app_id: str, key: KeyLike, *, version: str | None = None) -> Path:
         return self.app(app_id, version=version).path(key)
+
+
+def path(
+    app_id: str,
+    key: KeyLike,
+    version: str | None = None,
+    *,
+    config: object | None = None,
+    registry: Mapping[str, VFXApp] | None = None,
+    env: Mapping[str, str] | None = None,
+    context: Context | None = None,
+) -> Path:
+    """convenience function to resolve a single path without dealing with a full instance."""
+
+    return VFXDirs(config=config, registry=registry, env=env, context=context).path(
+        app_id, key, version=version
+    )
